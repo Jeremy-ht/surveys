@@ -6,9 +6,12 @@
         <div
           :class="[
             'tab-btn',
-            (['QuestionEditIndex', 'QuestionEditSetting', 'QuestionSkinSetting'].includes(
-              route.name
-            ) &&
+            ([
+              'QuestionEditIndex',
+              'QuestionEditSetting',
+              'QuestionSkinSetting',
+              'QuestionEditResultConfig'
+            ].includes(route.name) &&
               tab.to.name === 'QuestionEditIndex') ||
             isActive
               ? 'router-link-active'
@@ -58,18 +61,22 @@ const tabArr = [
   }
 ]
 const tabs = ref([])
-watch(() => store.state.cooperPermissions, (newVal) => {
-  tabs.value = []
-  // 如果有问卷管理权限，则加入问卷编辑和投放菜单
-  if (newVal.includes(SurveyPermissions.SurveyManage)) {
-    tabs.value.push(tabArr[0])
-    tabs.value.push(tabArr[1])
-  } 
-  // 如果有数据分析权限，则加入数据分析菜单
-  if (newVal.includes(SurveyPermissions.DataManage))  {
-    tabs.value.push(tabArr[2])
-  }
-}, { immediate: true })
+watch(
+  () => store.state.cooperPermissions,
+  (newVal) => {
+    tabs.value = []
+    // 如果有问卷管理权限，则加入问卷编辑和投放菜单
+    if (newVal.includes(SurveyPermissions.SurveyManage)) {
+      tabs.value.push(tabArr[0])
+      tabs.value.push(tabArr[1])
+    }
+    // 如果有数据分析权限，则加入数据分析菜单
+    if (newVal.includes(SurveyPermissions.DataManage)) {
+      tabs.value.push(tabArr[2])
+    }
+  },
+  { immediate: true }
+)
 </script>
 <style lang="scss" scoped>
 .nav {

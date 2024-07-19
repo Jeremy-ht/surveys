@@ -22,7 +22,7 @@
           </h2>
           <div class="operation">
             <el-button
-              class="btn space-btn"
+              class="btn create-btn"
               type="default"
               @click="onSpaceCreate"
               v-if="spaceType == SpaceType.Group"
@@ -30,7 +30,7 @@
               <i class="iconfont icon-chuangjian"></i>
               <span>创建团队空间</span>
             </el-button>
-            <el-button type="default" @click="onSetGroup" v-if="workSpaceId">
+            <el-button type="default" class="btn" @click="onSetGroup" v-if="workSpaceId">
               <i class="iconfont icon-shujuliebiao"></i>
               <span>团队管理</span>
             </el-button>
@@ -49,10 +49,17 @@
           :loading="loading"
           :data="surveyList"
           :total="surveyTotal"
-          @reflush="fetchSurveyList"
+          @refresh="fetchSurveyList"
           v-if="spaceType !== SpaceType.Group"
         ></BaseList>
-        <SpaceList v-if="spaceType === SpaceType.Group"></SpaceList>
+        <SpaceList
+          ref="spaceListRef"
+          @refresh="fetchSpaceList"
+          :loading="spaceLoading"
+          :data="spaceList"
+          :total="spaceTotal"
+          v-if="spaceType === SpaceType.Group"
+        ></SpaceList>
       </div>
     </div>
     <SpaceModify
@@ -86,6 +93,21 @@ const surveyList = computed(() => {
 const surveyTotal = computed(() => {
   return store.state.list.surveyTotal
 })
+const spaceListRef = ref<any>(null)
+const spaceLoading = ref(false)
+const spaceList = computed(() => {
+  return store.state.list.teamSpaceList
+})
+const spaceTotal = computed(() => {
+  return store.state.list.teamSpaceListTotal
+})
+const fetchSpaceList = async (params?: any) => {
+  spaceLoading.value = true
+  store.commit('list/changeWorkSpace', '')
+  await store.dispatch('list/getSpaceList', params)
+  spaceLoading.value = false
+}
+
 const activeIndex = ref('1')
 
 const spaceMenus = computed(() => {
@@ -97,39 +119,37 @@ const workSpaceId = computed(() => {
 const spaceType = computed(() => {
   return store.state.list.spaceType
 })
-const handleSpaceSelect = (id: any) => {
-  if (id === SpaceType.Personal) {
-    // 点击个人空间菜单
-    if (store.state.list.spaceType === SpaceType.Personal) {
-      return
-    }
-    store.commit('list/changeSpaceType', SpaceType.Personal)
-    store.commit('list/changeWorkSpace', '')
-  } else if (id === SpaceType.Group) {
-    // 点击团队空间组菜单
-    if (store.state.list.spaceType === SpaceType.Group) {
-      return
-    }
-    store.commit('list/changeSpaceType', SpaceType.Group)
-    store.commit('list/changeWorkSpace', '')
-  } else if (!Object.values(SpaceType).includes(id)) {
-    // 点击具体团队空间
-    if (store.state.list.workSpaceId === id) {
-      return
-    }
-    store.commit('list/changeSpaceType', SpaceType.Teamwork)
+const handleSpaceSelect = (id: SpaceType | string) => {
+  if (id === store.state.list.spaceType || id === store.state.list.workSpaceId) {
+    return void 0
+  }
+  const changeSpaceType = (type: SpaceType) => {
+    store.commit('list/changeSpaceType', type)
+  }
+  const changeWorkSpace = (id: string) => {
     store.commit('list/changeWorkSpace', id)
   }
-
+  switch (id) {
+    case SpaceType.Personal:
+      changeSpaceType(SpaceType.Personal)
+      changeWorkSpace('')
+      break
+    case SpaceType.Group:
+      changeSpaceType(SpaceType.Group)
+      changeWorkSpace('')
+      fetchSpaceList()
+      break
+    default:
+      changeSpaceType(SpaceType.Teamwork)
+      changeWorkSpace(id)
+      break
+  }
   fetchSurveyList()
 }
 onMounted(() => {
   fetchSpaceList()
   fetchSurveyList()
 })
-const fetchSpaceList = () => {
-  store.dispatch('list/getSpaceList')
-}
 const fetchSurveyList = async (params?: any) => {
   if (!params) {
     params = {
@@ -160,7 +180,10 @@ const onSetGroup = async () => {
 
 const onCloseModify = (type: string) => {
   showSpaceModify.value = false
-  if (type === 'update') fetchSpaceList()
+  if (type === 'update' && spaceListRef.value) {
+    fetchSpaceList()
+    spaceListRef.value.onCloseModify()
+  }
 }
 const onSpaceCreate = () => {
   showSpaceModify.value = true
@@ -254,10 +277,9 @@ const handleLogout = () => {
 
       .create-btn {
         background: #4a4c5b;
+        color: #fff;
       }
-      .space-btn {
-        background: $primary-color;
-      }
+
       .btn {
         width: 132px;
         height: 32px;
@@ -265,10 +287,9 @@ const handleLogout = () => {
         justify-content: center;
         align-items: center;
 
-        color: #fff;
-
+        .icon-shujuliebiao,
         .icon-chuangjian {
-          padding-right: 8px;
+          padding-right: 5px;
           font-size: 14px;
         }
 

@@ -144,13 +144,11 @@ npm run local
 
 ### 方案二、(生产推荐)
 
-#### 1、启动数据库
+#### 1、配置数据库
 
-> 项目使用 MongoDB：[MongoDB 安装指导](https://xiaojusurvey.didi.cn/docs/next/document/%E6%A6%82%E8%BF%B0/%E6%95%B0%E6%8D%AE%E5%BA%93#%E5%AE%89%E8%A3%85)
+> 项目使用 MongoDB，需要提前准备，请查看[如何拥有 MongoDB 指南](./数据库#安装)
 
-- 配置数据库，查看[MongoDB 配置](https://xiaojusurvey.didi.cn/docs/next/document/%E6%A6%82%E8%BF%B0/%E6%95%B0%E6%8D%AE%E5%BA%93)
-
-- 启动本地数据库，查看[MongoDB 启动](https://xiaojusurvey.didi.cn/docs/next/document/%E6%A6%82%E8%BF%B0/%E6%95%B0%E6%8D%AE%E5%BA%93#%E4%BA%94%E5%90%AF%E5%8A%A8)
+配置数据库信息，查看[MongoDB 配置](./数据库)。
 
 #### 2、安装依赖
 
@@ -230,6 +228,6 @@ npm run serve
 
 ## 文章分享
 
-1、[掘金](https://juejin.cn/user/3705833332160473/posts)、2、[InfoQ](https://www.infoq.cn/profile/7E08AC616A07B2/publish)
+1、[掘金](https://juejin.cn/user/3705833332160473/posts)、2、[CSDN](https://blog.csdn.net/XIAOJUSURVEY)、3、[InfoQ](https://www.infoq.cn/profile/7E08AC616A07B2/publish)
 
 [欢迎投稿](https://xiaojusurvey.didi.cn/docs/next/article/%E7%AE%80%E4%BB%8B)

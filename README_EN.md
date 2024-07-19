@@ -145,12 +145,11 @@ npm run local
 
 ### Option 2: (Recommended for Production)
 
-#### 1.Start Database
+#### 1.Configure Database
 
-> The project uses MongoDB: [MongoDB Installation Guide](https://xiaojusurvey.didi.cn/docs/next/document/%E6%A6%82%E8%BF%B0/%E6%95%B0%E6%8D%AE%E5%BA%93#%E5%AE%89%E8%A3%85)
+> The project uses MongoDB: [MongoDB Guide](https://xiaojusurvey.didi.cn/docs/next/document/%E6%A6%82%E8%BF%B0/%E6%95%B0%E6%8D%AE%E5%BA%93#%E5%AE%89%E8%A3%85)
 
-- Configure the database, check MongoDB configuration.
-- Start local database, check MongoDB startup.
+Configure the database, check MongoDB configuration.
 
 #### 2.Install Dependencies
 
@@ -228,6 +227,6 @@ Follow major changes: [MAJOR CHANGELOG](https://github.com/didi/xiaoju-survey/is
 
 ## Article Sharing
 
-1、[JueJin](https://juejin.cn/user/3705833332160473/posts)、2、[InfoQ](https://www.infoq.cn/profile/7E08AC616A07B2/publish)
+1、[x.com](https://x.com/t_sudoooooo)
 
 [Welcome to contribute.](https://xiaojusurvey.didi.cn/docs/next/article/%E7%AE%80%E4%BB%8B)
