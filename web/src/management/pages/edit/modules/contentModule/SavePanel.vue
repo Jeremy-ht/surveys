@@ -15,15 +15,22 @@
 </template>
 <script setup lang="ts">
 import { ref, computed, nextTick, watch } from 'vue'
-import { useStore } from 'vuex'
-import { get as _get } from 'lodash-es'
+import { useRoute } from 'vue-router'
+import { storeToRefs } from 'pinia'
+import { useEditStore } from '@/management/stores/edit'
 import { ElMessage } from 'element-plus'
 import 'element-plus/theme-chalk/src/message.scss'
 
 import { saveSurvey } from '@/management/api/survey'
-import { showLogicEngine } from '@/management/hooks/useShowLogicEngine'
 import buildData from './buildData'
 
+interface Props {
+  updateLogicConf: any
+  updateWhiteConf: any
+}
+
+const route = useRoute()
+const props = defineProps<Props>()
 const isSaving = ref<boolean>(false)
 const isShowAutoSave = ref<boolean>(false)
 const autoSaveStatus = ref<'succeed' | 'saving' | 'failed'>('succeed')
@@ -36,10 +43,33 @@ const saveText = computed(
     })[autoSaveStatus.value]
 )
 
-const store = useStore()
+const editStore = useEditStore()
+const { schemaUpdateTime } = storeToRefs(editStore)
+const { schema } = editStore
+
+const validate = () => {
+  let checked = true
+  let msg = ''
+  if (route.path.includes('edit/logic')) {
+    const { validated, message } = props.updateLogicConf()
+    checked = validated
+    msg = message
+  }
+
+  if (route.path.includes('edit/setting')) {
+    const { validated, message } = props.updateWhiteConf()
+    checked = validated
+    msg = message
+  }
+
+  return {
+    checked,
+    msg
+  }
+}
 
 const saveData = async () => {
-  const saveData = buildData(store.state.edit.schema)
+  const saveData = buildData(schema)
 
   if (!saveData.surveyId) {
     ElMessage.error('未获取到问卷id')
@@ -48,19 +78,6 @@ const saveData = async () => {
 
   const res = await saveSurvey(saveData)
   return res
-}
-
-const updateLogicConf = () => {
-  if (
-    showLogicEngine.value &&
-    showLogicEngine.value.rules &&
-    showLogicEngine.value.rules.length !== 0
-  ) {
-    showLogicEngine.value.validateSchema()
-    const showLogicConf = showLogicEngine.value.toJson()
-    // 更新逻辑配置
-    store.dispatch('edit/changeSchema', { key: 'logicConf', value: { showLogicConf } })
-  }
 }
 
 const timerHandle = ref<NodeJS.Timeout | number | null>(null)
@@ -106,11 +123,11 @@ const handleSave = async () => {
   isSaving.value = true
   isShowAutoSave.value = false
 
-  try {
-    updateLogicConf()
-  } catch (error) {
+  // 保存检测
+  const { checked, msg } = validate()
+  if (!checked) {
     isSaving.value = false
-    ElMessage.error('请检查逻辑配置是否有误')
+    ElMessage.error(msg)
     return
   }
 
@@ -128,7 +145,6 @@ const handleSave = async () => {
   }
 }
 
-const schemaUpdateTime = computed(() => _get(store.state, 'edit.schemaUpdateTime'))
 watch(schemaUpdateTime, () => {
   triggerAutoSave()
 })

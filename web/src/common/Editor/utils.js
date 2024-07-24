@@ -8,7 +8,6 @@ export const replacePxWithRem = (html) => {
   const imgRegex = /<img[^>]*style=["'][^"']*\b(?:width|height):\s*\d+(\.\d+)?px[^"']*["'][^>]*>/gi
   const styleRegex = /style="([^"]*)"/g
   if (!imgRegex.test(html)) {
-    console.log('无需修改')
     return html
   }
 
@@ -24,8 +23,6 @@ export const replacePxWithRem = (html) => {
       return `style="${styleContent}"`
     })
   })
-
-  console.log('生成的结果', res)
 
   return res
 }

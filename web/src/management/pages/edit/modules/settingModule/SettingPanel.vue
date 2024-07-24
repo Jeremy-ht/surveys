@@ -38,17 +38,38 @@
 </template>
 <script setup lang="ts">
 import { computed, ref, onMounted, shallowRef } from 'vue'
-import { useStore } from 'vuex'
-import { cloneDeep as _cloneDeep, isArray as _isArray, get as _get } from 'lodash-es'
+import {
+  cloneDeep as _cloneDeep,
+  isArray as _isArray,
+  get as _get,
+  isFunction as _isFunction
+} from 'lodash-es'
+import { useEditStore } from '@/management/stores/edit'
 
-import baseConfig from './config/baseConfig'
-import baseFormConfig from './config/baseFormConfig'
+import baseConfig from '@/management/pages/edit/setterConfig/baseConfig'
+import baseFormConfig from '@/management/pages/edit/setterConfig/baseFormConfig'
 import FormItem from '@/materials/setters/widgets/FormItem.vue'
 import setterLoader from '@/materials/setters/setterLoader'
 
+import WhiteList from './components/WhiteList.vue'
+import TeamMemberList from './components/TeamMemberList.vue'
+
+const editStore = useEditStore()
+const { schema, changeSchema } = editStore
+
 const formConfigList = ref<Array<any>>([])
-const components = shallowRef<any>({})
-const registerTypes = ref<any>({})
+const components = shallowRef<any>({
+  ['WhiteList']: WhiteList,
+  ['TeamMemberList']: TeamMemberList
+})
+// 登记默认注册的高级设置器组件
+const registerTypes = ref<any>({
+  WhiteList: 'WhiteList',
+  TeamMemberList: 'TeamMemberList'
+})
+
+const schemaBaseConf = computed(() => schema?.baseConf || {})
+
 const setterList = computed(() => {
   const list = _cloneDeep(formConfigList.value)
 
@@ -61,16 +82,23 @@ const setterList = computed(() => {
       if (_isArray(formKey)) {
         formValue = []
         for (const key of formKey) {
-          const val = _get(store.state.edit.schema, key, formItem.value)
+          const val = _get(schema, key, formItem.value)
           formValue.push(val)
           dataConfig[key] = val
         }
       } else {
-        formValue = _get(store.state.edit.schema, formKey, formItem.value)
+        formValue = _get(schema, formKey, formItem.value)
         dataConfig[formKey] = formValue
       }
       formItem.value = formValue
     }
+    // 动态显隐设置器
+    form.formList = form.formList.filter((item: any) => {
+      if (_isFunction(item.relyFunc)) {
+        return item.relyFunc(schemaBaseConf.value)
+      }
+      return true
+    })
 
     form.dataConfig = dataConfig
 
@@ -78,9 +106,8 @@ const setterList = computed(() => {
   })
 })
 
-const store = useStore()
 const handleFormChange = (data: any) => {
-  store.dispatch('edit/changeSchema', {
+  changeSchema({
     key: data.key,
     value: data.value
   })
@@ -93,10 +120,12 @@ onMounted(async () => {
   }))
 
   const formList = formConfigList.value.map((item) => item.formList).flat()
-  const typeList = formList.map((item) => ({
-    type: item.type,
-    path: item.path || item.type
-  }))
+  const typeList = formList
+    .filter((item) => !item.custom)
+    .map((item) => ({
+      type: item.type,
+      path: item.path || item.type
+    }))
 
   const comps = await setterLoader.loadComponents(typeList)
   for (const comp of comps) {
@@ -146,7 +175,6 @@ onMounted(async () => {
           padding-bottom: 19px;
           margin-bottom: 10px;
           border-bottom: 1px solid $border-color;
-          padding-left: 30px;
 
           span {
             position: relative;

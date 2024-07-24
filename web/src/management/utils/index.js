@@ -1,5 +1,5 @@
 import { defaultQuestionConfig } from '../config/questionConfig'
-import { map as _map } from 'lodash-es'
+import { map as _map, cloneDeep } from 'lodash-es'
 import questionLoader from '@/materials/questions/questionLoader'
 
 const generateQuestionField = () => {
@@ -51,7 +51,7 @@ export const getQuestionByType = (type, fields) => {
   }
 
   newQuestion.field = getNewField(fields) // 动态生成题目id
-  if ('options ' in newQuestion) {
+  if ('options' in newQuestion) {
     // 动态更新选项的hash-id
     const hashList = []
     for (const option of newQuestion.options) {
@@ -61,7 +61,7 @@ export const getQuestionByType = (type, fields) => {
     }
   }
 
-  return newQuestion
+  return cloneDeep(newQuestion)
 }
 
 export function filterQuestionPreviewData(data, currentEditOne = '') {
